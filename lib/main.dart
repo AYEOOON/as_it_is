@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: MainScreen(),
+      debugShowCheckedModeBanner: false, // 디버그 배너 제거
     );
   }
 }
