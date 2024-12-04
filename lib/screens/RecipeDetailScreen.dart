@@ -1,28 +1,37 @@
 import 'package:flutter/material.dart';
 
 class RecipeDetailScreen extends StatelessWidget {
-  final String title;
-  final String imageUrl;
-  final List<String> nutritionInfo;
-  final List<String> ingredients;
-  final List<String> instructions;
+  final Map<String, dynamic> recipe;
 
   const RecipeDetailScreen({
-    required this.title,
-    required this.imageUrl,
-    required this.nutritionInfo,
-    required this.ingredients,
-    required this.instructions,
+    required this.recipe,
   });
 
   @override
   Widget build(BuildContext context) {
+    // 데이터 가져오기
+    final String title = recipe['title'] ?? '레시피 제목 없음';
+    final String imageUrl = recipe['images']?['large'] ?? ''; // 큰 이미지 URL
+    final Map<String, dynamic> nutrition = recipe['nutrition'] ?? {};
+    final List<String> nutritionInfo = [
+      '${nutrition['calories'] ?? 0}kcal 열량',
+      '${nutrition['carbs'] ?? 0}g 탄수화물',
+      '${nutrition['protein'] ?? 0}g 단백질',
+      '${nutrition['fat'] ?? 0}g 지방',
+      '${nutrition['sodium'] ?? 0}mg 나트륨'
+    ];
+    final List<String> detailedIngredients =
+    List<String>.from(recipe['detailedIngredients'] ?? []);
+    final List<String> instructions =
+    List<String>.from(recipe['instructions'] ?? []);
+
     return Scaffold(
-      backgroundColor: Colors.white, // 배경을 흰색으로 설정
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          '레시피 상세보기 화면',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        title: Text(
+          title,
+          style: const TextStyle(
+              color: Colors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -47,7 +56,7 @@ class RecipeDetailScreen extends StatelessWidget {
                 color: Colors.black,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             // 이미지
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -55,23 +64,23 @@ class RecipeDetailScreen extends StatelessWidget {
                 height: 200,
                 width: double.infinity,
                 color: Colors.grey[200],
-                child: imageUrl.isEmpty
-                    ? const Center(
-                  child: Text(
-                    '요리 사진',
-                    style: TextStyle(color: Colors.grey, fontSize: 18),
-                  ),
-                )
-                    : Image.network(
+                child: _isValidNetworkImage(imageUrl)
+                    ? Image.network(
                   imageUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) =>
                   const Center(child: Text('이미지 로드 실패')),
+                )
+                    : const Center(
+                  child: Text(
+                    '이미지가 없습니다',
+                    style: TextStyle(color: Colors.grey, fontSize: 18),
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            // 영양 정보
+            // 영양정보
             const Text(
               '영양정보',
               style: TextStyle(
@@ -81,26 +90,18 @@ class RecipeDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
               children: nutritionInfo
                   .map(
-                    (info) => Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 45,
-                      backgroundColor: Colors.green[100],
-                      child: Text(
-                        info,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
+                    (info) => Chip(
+                  label: Text(
+                    info,
+                    style: const TextStyle(
+                        fontSize: 14, color: Colors.black),
+                  ),
+                  backgroundColor: Colors.green[100],
                 ),
               )
                   .toList(),
@@ -118,22 +119,15 @@ class RecipeDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: ingredients
-                  .asMap()
-                  .entries
-                  .map(
-                    (entry) => Padding(
+              children: detailedIngredients.map((ingredient) {
+                return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: Text(
-                    '${entry.key + 1}. ${entry.value}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
+                    ingredient,
+                    style: const TextStyle(fontSize: 16, color: Colors.black87),
                   ),
-                ),
-              )
-                  .toList(),
+                );
+              }).toList(),
             ),
             const SizedBox(height: 24),
             // 만드는 법
@@ -148,26 +142,24 @@ class RecipeDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: instructions
-                  .asMap()
-                  .entries
-                  .map(
-                    (entry) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+              children: instructions.map((step) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Text(
-                    '${entry.key + 1}. ${entry.value}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
+                    step,
+                    style: const TextStyle(fontSize: 16, color: Colors.black87),
                   ),
-                ),
-              )
-                  .toList(),
+                );
+              }).toList(),
             ),
           ],
         ),
       ),
     );
+  }
+
+  bool _isValidNetworkImage(String url) {
+    // URL이 비어있거나 file://로 시작하면 유효하지 않은 것으로 간주
+    return url.isNotEmpty && Uri.tryParse(url)?.hasAbsolutePath == true;
   }
 }

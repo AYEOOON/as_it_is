@@ -1,9 +1,16 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'screens/HomeScreen.dart';
 import 'screens/FavoriteRecipesScreen.dart';
 import 'screens/SettingScreen.dart';
+import 'src/createRecipesFromFiles.dart'; // JSON 생성 함수 파일
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // JSON 생성 후 실행
+  await createRecipesFromFiles(); // JSON 데이터 생성
   runApp(MyApp());
 }
 
@@ -11,80 +18,53 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Main(),
+      home: MainScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-// 초기 레시피 데이터
-final List<Map<String, dynamic>> testRecipes = [
-  {
-    'title': '김치찌개',
-    'image': '',
-    'isFavorite': true,
-    'nutrition': ['20g 탄수화물', '5g 단백질', '3g 지방', '200mg 나트륨'],
-    'calories': 300, // 추가된 열량
-    'carbs': 20, // 추가된 탄수화물
-    'protein': 5, // 추가된 단백질
-    'fat': 3, // 추가된 지방
-    'sodium': 200, // 추가된 나트륨
-    'ingredients': ['김치', '돼지고기', '양파', '대파'],
-    'instructions': ['1. 김치를 준비합니다.', '2. 돼지고기를 볶습니다.', '3. 끓입니다.'],
-  },
-  {
-    'title': '된장찌개',
-    'image': '',
-    'isFavorite': false,
-    'nutrition': ['15g 탄수화물', '6g 단백질', '2g 지방', '180mg 나트륨'],
-    'calories': 250,
-    'carbs': 15,
-    'protein': 6,
-    'fat': 2,
-    'sodium': 180,
-    'ingredients': ['된장', '감자', '애호박', '두부'],
-    'instructions': [
-      '1. 감자와 애호박을 썹니다.',
-      '2. 된장을 풀어 끓입니다.',
-      '3. 완성합니다.'
-    ],
-  },
-  {
-    'title': '비빔밥',
-    'image': '',
-    'isFavorite': false,
-    'nutrition': ['30g 탄수화물', '10g 단백질', '5g 지방', '250mg 나트륨'],
-    'calories': 500,
-    'carbs': 30,
-    'protein': 10,
-    'fat': 5,
-    'sodium': 250,
-    'ingredients': ['밥', '나물', '고추장', '계란'],
-    'instructions': [
-      '1. 밥을 준비합니다.',
-      '2. 나물을 볶습니다.',
-      '3. 고추장을 곁들입니다.'
-    ],
-  },
-];
-
-
-
-class Main extends StatefulWidget {
+class MainScreen extends StatefulWidget {
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<Main> {
-  int _currentIndex = 1;
-
-  List<Map<String, dynamic>> recipes = List.from(testRecipes);
-
-  late final List<Widget> _screens;
+class _MainScreenState extends State<MainScreen> {
+  int _currentIndex = 1; // 초기 화면은 검색 화면
+  List<Map<String, dynamic>> recipes = []; // 레시피 데이터 저장
+  List<String> allIngredients = []; // 전체 재료 데이터 저장
+  late List<Widget> _screens; // 화면 리스트
 
   @override
   void initState() {
     super.initState();
+    _loadData(); // JSON 데이터 불러오기
+  }
+
+  // JSON 데이터를 로드하는 함수
+  Future<void> _loadData() async {
+    try {
+      final file = File('recipes.json'); // JSON 파일 경로
+      if (await file.exists()) {
+        final jsonData = await file.readAsString();
+        final Map<String, dynamic> data = jsonDecode(jsonData);
+
+        setState(() {
+          recipes = List<Map<String, dynamic>>.from(data['recipes']);
+          allIngredients = List<String>.from(data['allIngredients']);
+        });
+      } else {
+        print('recipes.json not found. Using default recipes.');
+      }
+    } catch (e) {
+      print('Error loading recipes: $e');
+    }
+
+    _initializeScreens();
+  }
+
+  // 각 화면 초기화
+  void _initializeScreens() {
     _screens = [
       FavoriteRecipesScreen(
         recipes: recipes,
@@ -92,12 +72,14 @@ class _MainScreenState extends State<Main> {
       ),
       HomeScreen(
         recipes: recipes,
+        allIngredientsList: allIngredients, // 전체 재료 리스트 전달
         onUpdate: _updateRecipes,
       ),
       SettingsScreen(),
     ];
   }
 
+  // 레시피 업데이트 함수
   void _updateRecipes(List<Map<String, dynamic>> updatedRecipes) {
     setState(() {
       recipes = updatedRecipes;
@@ -107,7 +89,9 @@ class _MainScreenState extends State<Main> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: recipes.isEmpty
+          ? const Center(child: CircularProgressIndicator()) // 로딩 화면
+          : _screens[_currentIndex], // 현재 화면 표시
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -116,11 +100,8 @@ class _MainScreenState extends State<Main> {
           });
         },
         backgroundColor: Colors.green,
-        // 네비게이션 바 배경 색상
         selectedItemColor: Colors.white,
-        // 선택된 아이템 색상
         unselectedItemColor: Colors.lightGreen[100],
-        // 선택되지 않은 아이템 색상
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),

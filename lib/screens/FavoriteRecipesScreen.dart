@@ -21,10 +21,9 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen> {
   @override
   void initState() {
     super.initState();
-    _filterFavorites();
+    _filterFavorites(); // 즐겨찾기 필터링
   }
 
-  // 즐겨찾기 필터링
   void _filterFavorites() {
     setState(() {
       favoriteRecipes = widget.recipes
@@ -38,22 +37,21 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen> {
     });
   }
 
-  // 즐겨찾기 상태 변경
   void _toggleFavorite(Map<String, dynamic> recipe) {
     setState(() {
       recipe['isFavorite'] = !(recipe['isFavorite'] ?? false);
-      widget.onUpdate(widget.recipes); // Main에 업데이트를 반영
-      _filterFavorites(); // 즐겨찾기 목록 갱신
+      widget.onUpdate(widget.recipes); // Main에 업데이트 반영
     });
+    _filterFavorites(); // 즐겨찾기 목록 갱신
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // 배경 흰색
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
-          '북마크',
+          '즐겨찾기',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -65,7 +63,6 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen> {
       ),
       body: Column(
         children: [
-          // 검색창
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
@@ -76,7 +73,7 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen> {
                 });
               },
               decoration: InputDecoration(
-                hintText: '찾고자 하는 요리 이름',
+                hintText: '레시피 이름 검색',
                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
                 filled: true,
                 fillColor: Colors.grey[200],
@@ -87,7 +84,6 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen> {
               ),
             ),
           ),
-          // 즐겨찾기된 레시피 리스트
           Expanded(
             child: favoriteRecipes.isEmpty
                 ? const Center(
@@ -101,7 +97,7 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen> {
               itemBuilder: (context, index) {
                 final recipe = favoriteRecipes[index];
                 return Card(
-                  color: Colors.white, // 카드 배경 흰색
+                  color: Colors.white,
                   margin: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
@@ -117,29 +113,35 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen> {
                         color: Colors.grey[200],
                         width: 60,
                         height: 60,
-                        child: (recipe['image'] ?? '').isEmpty
+                        child: (recipe['images']?['small'] ?? '').isEmpty
                             ? const Icon(Icons.image,
                             size: 40, color: Colors.grey)
                             : Image.network(
-                          recipe['image'],
+                          recipe['images']?['small'],
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
+                          errorBuilder: (context, error,
+                              stackTrace) =>
                           const Icon(Icons.broken_image,
                               size: 40, color: Colors.grey),
                         ),
                       ),
                     ),
                     title: Text(
-                      recipe['title'],
+                      recipe['title'] ?? '제목 없음',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
-                    subtitle: const Text(
-                      '주요 재료 표시 가능',
-                      style:
-                      TextStyle(fontSize: 14, color: Colors.grey),
+                    subtitle: Text(
+                      recipe['ingredients'] != null
+                          ? (recipe['ingredients'] as List<dynamic>)
+                          .map((e) => e.toString())
+                          .take(3)
+                          .join(', ')
+                          : '재료 정보 없음',
+                      style: const TextStyle(
+                          fontSize: 14, color: Colors.grey),
                     ),
                     trailing: IconButton(
                       icon: Icon(
@@ -159,11 +161,7 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => RecipeDetailScreen(
-                            title: recipe['title'],
-                            imageUrl: recipe['image'] ?? '',
-                            nutritionInfo: recipe['nutrition'] ?? [],
-                            ingredients: recipe['ingredients'] ?? [],
-                            instructions: recipe['instructions'] ?? [],
+                            recipe: recipe,
                           ),
                         ),
                       );
