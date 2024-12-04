@@ -1,40 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/AllergyProvider.dart';
 
-class AllergySettingsScreen extends StatefulWidget {
-  @override
-  _AllergySettingsScreenState createState() => _AllergySettingsScreenState();
-}
-
-class _AllergySettingsScreenState extends State<AllergySettingsScreen> {
-  final List<String> allergyItems = [
-    '난류',
-    '대두',
-    '우유',
-    '곡류',
-    '감각류',
-    '견과류',
-    '생선류',
-    '연체류',
-    '아황산류',
-    '육류',
-  ];
-
-  final List<bool> isSelected = List.generate(10, (index) => false); // 선택 상태 저장
-
+class AllergySettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final allergyProvider = Provider.of<AllergyProvider>(context);
+
     return Scaffold(
-      backgroundColor: Colors.white, // 배경 흰색으로 설정
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.green,
         elevation: 0,
         title: const Text(
           '알러지 유발 식품 목록',
-          style: TextStyle(color: Colors.black,
-            fontWeight: FontWeight.bold,),
+          style: TextStyle(
+            fontSize: 20,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -42,40 +29,21 @@ class _AllergySettingsScreenState extends State<AllergySettingsScreen> {
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: allergyItems.length,
+        itemCount: allergyProvider.allergyItems.length,
         itemBuilder: (context, index) {
           return CheckboxListTile(
             title: Text(
-              allergyItems[index],
+              allergyProvider.allergyItems[index],
               style: const TextStyle(fontSize: 16, color: Colors.black),
             ),
-            value: isSelected[index],
+            value: allergyProvider.isSelected[index],
             onChanged: (bool? value) {
-              setState(() {
-                isSelected[index] = value ?? false;
-              });
+              allergyProvider.updateSelection(index, value ?? false);
             },
+            activeColor: Colors.green,
+            checkColor: Colors.white,
           );
         },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.green,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.lightGreen[100],
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: '즐겨찾기',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '홈',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: '설정',
-          ),
-        ],
       ),
     );
   }

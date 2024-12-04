@@ -54,6 +54,7 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen> {
           '즐겨찾기',
           style: TextStyle(
             color: Colors.black,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),

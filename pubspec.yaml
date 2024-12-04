@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  provider: ^6.0.5
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -64,6 +65,7 @@ flutter:
     - lib/src/names.txt
     - lib/src/nutrition.txt
     - lib/src/instructions.txt
+    - lib/src/categories.txt
 
   # To add assets to your application, add an assets section, like this:
   # assets:
