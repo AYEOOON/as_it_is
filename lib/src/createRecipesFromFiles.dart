@@ -10,6 +10,7 @@ Future<void> createRecipesFromFiles() async {
     final ingredientsList = await File('lib/src/ingredients.txt').readAsLines();
     final detailedIngredientsList = await File('lib/src/detailed_ingredients.txt').readAsLines();
     final instructionsRaw = await File('lib/src/instructions.txt').readAsString();
+    final categories = await File('lib/src/categories.txt').readAsLines(); // 카테고리 파일 읽기
 
     // 전체 일반 재료 리스트
     Set<String> allIngredientsSet = {};
@@ -86,8 +87,8 @@ Future<void> createRecipesFromFiles() async {
             .map((e) => e.replaceFirst(RegExp(r'^\d+\.\s*'), '')) // 숫자와 점 제거
             .toList();
 
-        // 일반 재료 파싱: 숫자. 이후의 내용을 가져와 , 로 구분
-        final ingredientsRaw = ingredientsList[i].replaceFirst(RegExp(r'^\d+\.\s*'), '');
+        // 일반 재료 파싱
+        final ingredientsRaw = ingredientsList[i];
         final ingredients = ingredientsRaw
             .split(',')
             .map((e) => e.trim())
@@ -104,6 +105,9 @@ Future<void> createRecipesFromFiles() async {
         }
         final instructions = parsedInstructions[i];
 
+        // 카테고리 파싱
+        final category = i < categories.length ? categories[i].trim() : '기타';
+
         // JSON 객체 생성
         recipes.add({
           'title': recipeName,
@@ -118,10 +122,11 @@ Future<void> createRecipesFromFiles() async {
             'carbs': carbs,
             'sodium': sodium,
           },
-          'ingredients': ingredients, // JSON에 한 줄씩 나뉜 일반 재료
+          'category': category, // 카테고리 추가
+          'ingredients': ingredients,
           'detailedIngredients': detailedIngredients,
           'instructions': instructions,
-          'isFavorite': false, // 즐겨찾기 초기값 설정
+          'isFavorite': false,
         });
       } catch (e) {
         print('Error processing recipe at line ${i + 1}: $e');
@@ -134,7 +139,7 @@ Future<void> createRecipesFromFiles() async {
     // JSON 변환 및 저장
     final jsonOutput = JsonEncoder.withIndent('  ').convert({
       'recipes': recipes,
-      'allIngredients': allIngredientsList, // 검색용 전체 재료 리스트
+      'allIngredients': allIngredientsList,
     });
     await File('recipes.json').writeAsString(jsonOutput);
 
