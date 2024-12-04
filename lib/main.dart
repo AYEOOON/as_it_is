@@ -1,17 +1,28 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'screens/HomeScreen.dart';
 import 'screens/FavoriteRecipesScreen.dart';
 import 'screens/SettingScreen.dart';
-import 'src/createRecipesFromFiles.dart'; // JSON 생성 함수 파일
+import 'providers/AllergyProvider.dart';
+import 'providers/MaterialProvider.dart';
+import 'src/createRecipesFromFiles.dart'; // JSON 생성 함수 파일 추가
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // JSON 생성 후 실행
   await createRecipesFromFiles(); // JSON 데이터 생성
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AllergyProvider()), // 알러지 상태 관리
+        ChangeNotifierProvider(create: (_) => MaterialProvider()), // 재료 상태 관리
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -53,6 +64,10 @@ class _MainScreenState extends State<MainScreen> {
           recipes = List<Map<String, dynamic>>.from(data['recipes']);
           allIngredients = List<String>.from(data['allIngredients']);
         });
+
+        // 전역 재료 데이터 초기화
+        final materialProvider = Provider.of<MaterialProvider>(context, listen: false);
+        materialProvider.setMaterials(allIngredients);
       } else {
         print('recipes.json not found. Using default recipes.');
       }
@@ -71,8 +86,8 @@ class _MainScreenState extends State<MainScreen> {
         onUpdate: _updateRecipes,
       ),
       HomeScreen(
+        allIngredients: allIngredients, // 전체 재료 리스트 전달
         recipes: recipes,
-        allIngredientsList: allIngredients, // 전체 재료 리스트 전달
         onUpdate: _updateRecipes,
       ),
       SettingsScreen(),
