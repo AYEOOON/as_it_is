@@ -27,7 +27,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
   void initState() {
     super.initState();
     scrollController = ScrollController();
-    filteredRecipes = widget.recipes; // 초기값은 모든 레시피
+    _filterRecipesByMaterials(); // 선택된 재료에 따라 초기 필터링
   }
 
   @override
@@ -36,20 +36,38 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
     super.dispose();
   }
 
+  void _filterRecipesByMaterials() {
+    setState(() {
+      filteredRecipes = widget.recipes.where((recipe) {
+        final ingredients = (recipe['ingredients'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+            [];
+        return widget.selectedMaterials.every((material) =>
+            ingredients.any((ingredient) => ingredient.contains(material)));
+      }).toList();
+    });
+  }
+
   // 정렬 함수
   void sortRecipes(String? criteria) {
     setState(() {
       selectedFilter = criteria;
       if (criteria == 'calories') {
-        filteredRecipes.sort((a, b) => a['calories'].compareTo(b['calories']));
+        filteredRecipes.sort((a, b) => a['nutrition']['calories']
+            .compareTo(b['nutrition']['calories']));
       } else if (criteria == 'carbs') {
-        filteredRecipes.sort((a, b) => a['carbs'].compareTo(b['carbs']));
+        filteredRecipes.sort((a, b) =>
+            a['nutrition']['carbs'].compareTo(b['nutrition']['carbs']));
       } else if (criteria == 'protein') {
-        filteredRecipes.sort((a, b) => a['protein'].compareTo(b['protein']));
+        filteredRecipes.sort((a, b) =>
+            a['nutrition']['protein'].compareTo(b['nutrition']['protein']));
       } else if (criteria == 'fat') {
-        filteredRecipes.sort((a, b) => a['fat'].compareTo(b['fat']));
+        filteredRecipes.sort((a, b) =>
+            a['nutrition']['fat'].compareTo(b['nutrition']['fat']));
       } else if (criteria == 'sodium') {
-        filteredRecipes.sort((a, b) => a['sodium'].compareTo(b['sodium']));
+        filteredRecipes.sort((a, b) =>
+            a['nutrition']['sodium'].compareTo(b['nutrition']['sodium']));
       }
     });
   }
@@ -57,8 +75,9 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
   // 즐겨찾기 토글
   void toggleFavorite(int index) {
     setState(() {
-      filteredRecipes[index]['isFavorite'] = !filteredRecipes[index]['isFavorite'];
-      widget.onUpdate(filteredRecipes); // 부모(Main)로 데이터 업데이트 전달
+      filteredRecipes[index]['isFavorite'] =
+      !(filteredRecipes[index]['isFavorite'] ?? false);
+      widget.onUpdate(widget.recipes); // 부모(Main)로 데이터 업데이트 전달
     });
   }
 
@@ -66,7 +85,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
   void applyCategoryFilter(String category) {
     setState(() {
       filteredRecipes = widget.recipes.where((recipe) {
-        // 임시 카테고리 필터 (실제 데이터에 따라 수정 필요)
+        // 카테고리가 포함된 레시피 필터링 (임시 구현)
         return recipe['title'].contains(category);
       }).toList();
     });
@@ -75,7 +94,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // 배경을 흰색으로 설정
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
           '검색된 레시피',
@@ -140,7 +159,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
                       .toList(),
                 ),
               ),
-              // 필터 드롭다운 (커스텀 스타일)
+              // 필터 드롭다운
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Row(
@@ -161,11 +180,8 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
                           DropdownMenuItem(value: 'sodium', child: Text('나트륨')),
                         ],
                         onChanged: sortRecipes,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                        ),
-                        dropdownColor: Colors.white, // 드롭다운 배경색 설정
+                        style: const TextStyle(fontSize: 14, color: Colors.black),
+                        dropdownColor: Colors.white,
                         borderRadius: BorderRadius.circular(8),
                         alignment: Alignment.center,
                       ),
@@ -182,21 +198,23 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
                     final recipe = filteredRecipes[index];
                     return RecipeSearchItem(
                       title: recipe['title'],
-                      imageUrl: recipe['image'], // 이미지 추가
+                      imageUrl: recipe['images']?['small'] ?? '',
                       ingredients: recipe['nutrition'] != null
-                          ? recipe['nutrition'].join('\n') // 개행 추가
+                          ? [
+                        '열량: ${recipe['nutrition']['calories']} kcal',
+                        '탄수화물: ${recipe['nutrition']['carbs']}g',
+                        '단백질: ${recipe['nutrition']['protein']}g',
+                        '지방: ${recipe['nutrition']['fat']}g',
+                        '나트륨: ${recipe['nutrition']['sodium']}mg',
+                      ].join('\n')
                           : '정보 없음',
-                      isFavorite: recipe['isFavorite'], // 즐겨찾기 상태
+                      isFavorite: recipe['isFavorite'] ?? false,
                       onDetailTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => RecipeDetailScreen(
-                              title: recipe['title'],
-                              imageUrl: recipe['image'] ?? '',
-                              nutritionInfo: recipe['nutrition'] ?? [],
-                              ingredients: recipe['ingredients'] ?? [],
-                              instructions: recipe['instructions'] ?? [],
+                              recipe: recipe,
                             ),
                           ),
                         );
@@ -220,7 +238,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
             curve: Curves.easeInOut,
           );
         },
-        backgroundColor: Colors.green, // 버튼을 초록색으로 변경
+        backgroundColor: Colors.green,
         child: const Icon(Icons.arrow_upward, color: Colors.white),
       ),
     );
@@ -240,7 +258,7 @@ class _CategoryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green, // 버튼을 초록색으로 설정
+          backgroundColor: Colors.green,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
           ),

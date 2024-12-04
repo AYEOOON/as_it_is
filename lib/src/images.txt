@@ -1,0 +1,11 @@
+Main Image (Small)	Main Image (Large)
+http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00028_2.png	http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00028_1.png
+http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00029_2.png	http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00029_1.png
+http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00031_2.png	http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00031_1.png
+http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00032_2.png	http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00032_2.png
+http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00033_2.png	http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00033_1.png
+http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00036_2.png	http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00036_1.png
+http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00037_2.png	http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00037_1.png
+http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00038_2.png	http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00038_1.png
+http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00095_2.png	http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00095_1.png
+http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00087_2.png	http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00087_1.png
