@@ -38,72 +38,46 @@ Future<void> createRecipesFromFiles() async {
       try {
         // 레시피 이름 파싱
         final recipeMatch = RegExp(r'^\d+\.\s*(.+)$').firstMatch(names[i]);
-        if (recipeMatch == null) {
-          print('Invalid recipe name format at line ${i + 1}');
-          continue;
-        }
-        final recipeName = recipeMatch.group(1)?.trim() ?? '';
+        final recipeName = recipeMatch?.group(1)?.trim() ?? '';
 
         // 이미지 URL 파싱
-        if (i >= images.length) {
-          print('Missing image data for recipe at line ${i + 1}');
-          continue;
-        }
-        final imageUrls = images[i].split('\t');
-        if (imageUrls.length < 2) {
-          print('Invalid image format for recipe at line ${i + 1}');
-          continue;
-        }
-        final mainImageSmall = imageUrls[0].trim();
-        final mainImageLarge = imageUrls[1].trim();
+        final imageUrls = i < images.length ? images[i].split('\t') : ['', ''];
+        final mainImageSmall = imageUrls.isNotEmpty ? imageUrls[0].trim() : '';
+        final mainImageLarge = imageUrls.length > 1 ? imageUrls[1].trim() : '';
 
         // 영양 정보 파싱
-        if (i >= nutritionList.length) {
-          print('Missing nutrition data for recipe at line ${i + 1}');
-          continue;
-        }
-        final nutritionData = nutritionList[i].split(',').map((e) => e.trim()).toList();
-        if (nutritionData.length < 6) {
-          print('Invalid nutrition format for recipe at line ${i + 1}');
-          continue;
-        }
-        final calories = int.tryParse(nutritionData[1]) ?? 0;
-        final protein = int.tryParse(nutritionData[2]) ?? 0;
-        final fat = int.tryParse(nutritionData[3]) ?? 0;
-        final carbs = int.tryParse(nutritionData[4]) ?? 0;
-        final sodium = int.tryParse(nutritionData[5]) ?? 0;
+        final nutritionData = i < nutritionList.length
+            ? nutritionList[i].split(',').map((e) => e.trim()).toList()
+            : ['', '0', '0', '0', '0', '0'];
+        final calories = double.tryParse(nutritionData.length > 1 ? nutritionData[1] : '0') ?? 0.0;
+        final protein = double.tryParse(nutritionData.length > 2 ? nutritionData[2] : '0') ?? 0.0;
+        final fat = double.tryParse(nutritionData.length > 3 ? nutritionData[3] : '0') ?? 0.0;
+        final carbs = double.tryParse(nutritionData.length > 4 ? nutritionData[4] : '0') ?? 0.0;
+        final sodium = double.tryParse(nutritionData.length > 5 ? nutritionData[5] : '0') ?? 0.0;
 
         // 재료 및 상세 재료 파싱
-        if (i >= ingredientsList.length || i >= detailedIngredientsList.length) {
-          print('Missing ingredient data for recipe at line ${i + 1}');
-          continue;
-        }
-
-        // 숫자와 점 제거하여 상세 재료 저장
-        final detailedIngredients = detailedIngredientsList[i]
+        final detailedIngredients = i < detailedIngredientsList.length
+            ? detailedIngredientsList[i]
             .split(',')
             .map((e) => e.trim())
             .where((e) => e.isNotEmpty)
-            .map((e) => e.replaceFirst(RegExp(r'^\d+\.\s*'), '')) // 숫자와 점 제거
-            .toList();
-
-        // 일반 재료 파싱
-        final ingredientsRaw = ingredientsList[i];
+            .map((e) => e.replaceFirst(RegExp(r'^\d+\.\s*'), ''))
+            .toList()
+            : [];
+        final ingredientsRaw = i < ingredientsList.length ? ingredientsList[i] : '';
         final ingredients = ingredientsRaw
             .split(',')
             .map((e) => e.trim())
             .where((e) => e.isNotEmpty)
+            .where((e) => RegExp(r'^[가-힣\s]+$').hasMatch(e)) // 한글 필터링
+            .where((e) => !e.contains(RegExp(r'(양념장|소스)'))) // 양념장, 소스 제거
             .toList();
 
         // 전체 재료 리스트에 추가
         allIngredientsSet.addAll(ingredients);
 
         // 만드는 법 파싱
-        if (i >= parsedInstructions.length) {
-          print('Missing instructions data for recipe at line ${i + 1}');
-          continue;
-        }
-        final instructions = parsedInstructions[i];
+        final instructions = i < parsedInstructions.length ? parsedInstructions[i] : [];
 
         // 카테고리 파싱
         final category = i < categories.length ? categories[i].trim() : '기타';
