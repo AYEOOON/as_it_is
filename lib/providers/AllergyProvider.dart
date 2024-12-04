@@ -45,7 +45,7 @@ class AllergyProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// 선택된 알러지 항목에 해당하는 재료를 반환
+  // 선택된 알러지 항목에 해당하는 재료를 반환
   List<String> getExcludedIngredients() {
     List<String> excludedIngredients = [];
 

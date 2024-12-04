@@ -15,6 +15,7 @@ class AllergySettingsScreen extends StatelessWidget {
         title: const Text(
           '알러지 유발 식품 목록',
           style: TextStyle(
+            fontSize: 20,
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),

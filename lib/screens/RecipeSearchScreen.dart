@@ -21,7 +21,8 @@ class RecipeSearchScreen extends StatefulWidget {
 
 class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
   List<String> categories = ['국&찌개', '반찬', '후식', '기타'];
-  String? selectedFilter; // 정렬 기준
+  String? selectedNutrient; // 선택된 영양소
+  String? sortOrder = '오름차순'; // 정렬 순서
   late ScrollController scrollController;
   late List<Map<String, dynamic>> filteredRecipes; // 필터링된 레시피 리스트
 
@@ -38,7 +39,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
     super.dispose();
   }
 
-  /// 선택된 재료와 알레르기 데이터를 기반으로 레시피를 필터링합니다.
+  /// 선택된 재료와 알레르기 데이터를 기반으로 레시피를 필터링
   void _filterRecipes() {
     final allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
     final List<String> excludedIngredients = allergyProvider.getExcludedIngredients();
@@ -62,26 +63,19 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
     });
   }
 
-  /// 정렬 기준에 따라 레시피를 정렬합니다.
-  void sortRecipes(String? criteria) {
+  /// 영양소 및 정렬 순서에 따라 레시피를 정렬
+  void sortRecipes() {
+    if (selectedNutrient == null) return; // 정렬 기준이 선택되지 않은 경우 종료
     setState(() {
-      selectedFilter = criteria;
-      if (criteria == 'calories') {
-        filteredRecipes.sort((a, b) => a['nutrition']['calories']
-            .compareTo(b['nutrition']['calories']));
-      } else if (criteria == 'carbs') {
-        filteredRecipes.sort((a, b) =>
-            a['nutrition']['carbs'].compareTo(b['nutrition']['carbs']));
-      } else if (criteria == 'protein') {
-        filteredRecipes.sort((a, b) =>
-            a['nutrition']['protein'].compareTo(b['nutrition']['protein']));
-      } else if (criteria == 'fat') {
-        filteredRecipes.sort((a, b) =>
-            a['nutrition']['fat'].compareTo(b['nutrition']['fat']));
-      } else if (criteria == 'sodium') {
-        filteredRecipes.sort((a, b) =>
-            a['nutrition']['sodium'].compareTo(b['nutrition']['sodium']));
-      }
+      filteredRecipes.sort((a, b) {
+        final valueA = a['nutrition'][selectedNutrient] ?? 0;
+        final valueB = b['nutrition'][selectedNutrient] ?? 0;
+        if (sortOrder == '오름차순') {
+          return valueA.compareTo(valueB);
+        } else {
+          return valueB.compareTo(valueA);
+        }
+      });
     });
   }
 
@@ -103,7 +97,6 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
       }).toList();
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -170,32 +163,100 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
                   .toList(),
             ),
           ),
-          // 필터 드롭다운
+          // 정렬 필터 드롭다운
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: selectedFilter,
-                    hint: const Text(
-                      '정렬 기준',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'calories', child: Text('열량')),
-                      DropdownMenuItem(value: 'carbs', child: Text('탄수화물')),
-                      DropdownMenuItem(value: 'protein', child: Text('단백질')),
-                      DropdownMenuItem(value: 'fat', child: Text('지방')),
-                      DropdownMenuItem(value: 'sodium', child: Text('나트륨')),
-                    ],
-                    onChanged: sortRecipes,
-                    style: const TextStyle(fontSize: 14, color: Colors.black),
-                    dropdownColor: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    alignment: Alignment.center,
+                // 영양소 기준 선택
+                DropdownButton<String>(
+                  value: selectedNutrient,
+                  hint: const Text(
+                    '정렬 기준',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
                   ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'calories',
+                      child: Text(
+                        '열량',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'carbs',
+                      child: Text(
+                        '탄수화물',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'protein',
+                      child: Text(
+                        '단백질',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'fat',
+                      child: Text(
+                        '지방',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'sodium',
+                      child: Text(
+                        '나트륨',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedNutrient = value;
+                      sortRecipes();
+                    });
+                  },
+                  style: const TextStyle(fontSize: 14, color: Colors.black),
+                  dropdownColor: Colors.white, // 드롭다운 배경 색상
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(8),
+                  alignment: Alignment.center,
+                  iconSize: 20, // 드롭다운 아이콘 크기
+                ),
+                // 정렬 순서 선택
+                DropdownButton<String>(
+                  value: sortOrder,
+                  items: const [
+                    DropdownMenuItem(
+                      value: '오름차순',
+                      child: Text(
+                        '오름차순',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: '내림차순',
+                      child: Text(
+                        '내림차순',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      sortOrder = value;
+                      sortRecipes();
+                    });
+                  },
+                  style: const TextStyle(fontSize: 14, color: Colors.black),
+                  dropdownColor: Colors.white, // 드롭다운 배경 색상
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(8),
+                  alignment: Alignment.center,
+                  iconSize: 20, // 드롭다운 아이콘 크기
                 ),
               ],
             ),
