@@ -23,6 +23,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
   List<String> categories = ['국&찌개', '반찬', '후식', '기타'];
   String? selectedNutrient; // 선택된 영양소
   String? sortOrder = '오름차순'; // 정렬 순서
+  String? selectedCategory; // 선택된 카테고리
   late ScrollController scrollController;
   late List<Map<String, dynamic>> filteredRecipes; // 필터링된 레시피 리스트
 
@@ -50,6 +51,8 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
             ?.map((e) => e.toString())
             .toList() ??
             [];
+        final recipeCategory = recipe['category'] ?? '기타';
+
         final containsSelectedMaterials = widget.selectedMaterials.every(
               (material) => ingredients.any((ingredient) => ingredient.contains(material)),
         );
@@ -57,8 +60,10 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
               (allergen) => ingredients.contains(allergen),
         );
 
-        // 포함된 재료 조건 + 알레르기 제외 조건
-        return containsSelectedMaterials && !containsExcludedAllergens;
+        // 포함된 재료 조건 + 알레르기 제외 조건 + 선택된 카테고리 조건
+        final matchesCategory = selectedCategory == null || recipeCategory == selectedCategory;
+
+        return containsSelectedMaterials && !containsExcludedAllergens && matchesCategory;
       }).toList();
     });
   }
@@ -79,7 +84,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
     });
   }
 
-  /// 즐겨찾기 상태를 토글합니다.
+  /// 즐겨찾기 상태를 토글
   void toggleFavorite(int index) {
     setState(() {
       filteredRecipes[index]['isFavorite'] =
@@ -91,10 +96,8 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
   /// 카테고리 필터 적용
   void applyCategoryFilter(String category) {
     setState(() {
-      filteredRecipes = widget.recipes.where((recipe) {
-        final recipeCategory = recipe['category'] ?? '기타';
-        return recipeCategory == category;
-      }).toList();
+      selectedCategory = category == selectedCategory ? null : category;
+      _filterRecipes();
     });
   }
 
@@ -158,6 +161,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
               children: categories
                   .map((category) => _CategoryButton(
                 label: category,
+                isSelected: selectedCategory == category,
                 onTap: () => applyCategoryFilter(category),
               ))
                   .toList(),
@@ -179,38 +183,23 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
                   items: const [
                     DropdownMenuItem(
                       value: 'calories',
-                      child: Text(
-                        '열량',
-                        style: TextStyle(fontSize: 14),
-                      ),
+                      child: Text('열량', style: TextStyle(fontSize: 14)),
                     ),
                     DropdownMenuItem(
                       value: 'carbs',
-                      child: Text(
-                        '탄수화물',
-                        style: TextStyle(fontSize: 14),
-                      ),
+                      child: Text('탄수화물', style: TextStyle(fontSize: 14)),
                     ),
                     DropdownMenuItem(
                       value: 'protein',
-                      child: Text(
-                        '단백질',
-                        style: TextStyle(fontSize: 14),
-                      ),
+                      child: Text('단백질', style: TextStyle(fontSize: 14)),
                     ),
                     DropdownMenuItem(
                       value: 'fat',
-                      child: Text(
-                        '지방',
-                        style: TextStyle(fontSize: 14),
-                      ),
+                      child: Text('지방', style: TextStyle(fontSize: 14)),
                     ),
                     DropdownMenuItem(
                       value: 'sodium',
-                      child: Text(
-                        '나트륨',
-                        style: TextStyle(fontSize: 14),
-                      ),
+                      child: Text('나트륨', style: TextStyle(fontSize: 14)),
                     ),
                   ],
                   onChanged: (value) {
@@ -220,11 +209,11 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
                     });
                   },
                   style: const TextStyle(fontSize: 14, color: Colors.black),
-                  dropdownColor: Colors.white, // 드롭다운 배경 색상
+                  dropdownColor: Colors.white,
                   elevation: 4,
                   borderRadius: BorderRadius.circular(8),
                   alignment: Alignment.center,
-                  iconSize: 20, // 드롭다운 아이콘 크기
+                  iconSize: 20,
                 ),
                 // 정렬 순서 선택
                 DropdownButton<String>(
@@ -232,17 +221,11 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
                   items: const [
                     DropdownMenuItem(
                       value: '오름차순',
-                      child: Text(
-                        '오름차순',
-                        style: TextStyle(fontSize: 14),
-                      ),
+                      child: Text('오름차순', style: TextStyle(fontSize: 14)),
                     ),
                     DropdownMenuItem(
                       value: '내림차순',
-                      child: Text(
-                        '내림차순',
-                        style: TextStyle(fontSize: 14),
-                      ),
+                      child: Text('내림차순', style: TextStyle(fontSize: 14)),
                     ),
                   ],
                   onChanged: (value) {
@@ -252,11 +235,11 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
                     });
                   },
                   style: const TextStyle(fontSize: 14, color: Colors.black),
-                  dropdownColor: Colors.white, // 드롭다운 배경 색상
+                  dropdownColor: Colors.white,
                   elevation: 4,
                   borderRadius: BorderRadius.circular(8),
                   alignment: Alignment.center,
-                  iconSize: 20, // 드롭다운 아이콘 크기
+                  iconSize: 20,
                 ),
               ],
             ),
@@ -306,9 +289,14 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
 
 class _CategoryButton extends StatelessWidget {
   final String label;
+  final bool isSelected;
   final VoidCallback onTap;
 
-  const _CategoryButton({required this.label, required this.onTap});
+  const _CategoryButton({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -317,7 +305,7 @@ class _CategoryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green,
+          backgroundColor: isSelected ? Colors.green[700] : Colors.green,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
           ),
