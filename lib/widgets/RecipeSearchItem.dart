@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'ReusableButton.dart';
 
 class RecipeSearchItem extends StatelessWidget {
   final String title;
@@ -99,27 +100,10 @@ class RecipeSearchItem extends StatelessWidget {
                     const SizedBox(height: 10),
                   ],
                   // 레시피 상세 정보 버튼
-                  ElevatedButton(
-                    onPressed: onDetailTap,
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          Colors.green), // 초록색 버튼
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                        const EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 20,
-                        ),
-                      ),
-                    ),
-                    child: const Text(
-                      '레시피 상세 정보',
-                      style: TextStyle(color: Colors.white, fontSize: 14),
-                    ),
+                  ReusableButton(
+                    label: '레시피 상세 정보',
+                    isSelected: false,
+                    onTap: onDetailTap,
                   ),
                 ],
               ),

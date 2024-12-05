@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/AllergyProvider.dart';
 import '../services/openai_service.dart';
+import '../widgets/ReusableButton.dart';
 
 
 class RecipeDetailScreen extends StatelessWidget {
@@ -151,18 +152,15 @@ class RecipeDetailScreen extends StatelessWidget {
             Wrap(
               spacing: 12,
               runSpacing: 12,
-              children: nutritionInfo
-                  .map(
-                    (info) => Chip(
-                  label: Text(
-                    info,
-                    style: const TextStyle(
-                        fontSize: 14, color: Colors.black),
-                  ),
-                  backgroundColor: Colors.green[100],
-                ),
-              )
-                  .toList(),
+              children: nutritionInfo.map(
+                    (info) {
+                  return ReusableButton(
+                    label: info,
+                    isSelected: false,
+                    onTap: () {},
+                  );
+                },
+              ).toList(),
             ),
             const SizedBox(height: 24),
             // 필요한 재료
