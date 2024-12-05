@@ -41,14 +41,6 @@ class SettingsScreen extends StatelessWidget {
               );
             },
           ),
-          const SectionHeader(title: '앱 설정'),
-          SettingItem(
-            label: '다크 모드',
-            value: '꺼짐',
-            onTap: () {
-              print('다크 모드 클릭');
-            },
-          ),
         ],
       ),
     );
