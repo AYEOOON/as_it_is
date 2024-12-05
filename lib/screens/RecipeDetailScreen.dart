@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/ReusableButton.dart';
 
 class RecipeDetailScreen extends StatelessWidget {
   final Map<String, dynamic> recipe;
@@ -93,18 +94,15 @@ class RecipeDetailScreen extends StatelessWidget {
             Wrap(
               spacing: 12,
               runSpacing: 12,
-              children: nutritionInfo
-                  .map(
-                    (info) => Chip(
-                  label: Text(
-                    info,
-                    style: const TextStyle(
-                        fontSize: 14, color: Colors.black),
-                  ),
-                  backgroundColor: Colors.green[100],
-                ),
-              )
-                  .toList(),
+              children: nutritionInfo.map(
+                    (info) {
+                  return ReusableButton(
+                    label: info,
+                    isSelected: false,
+                    onTap: () {},
+                  );
+                },
+              ).toList(),
             ),
             const SizedBox(height: 24),
             // 필요한 재료

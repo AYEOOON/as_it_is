@@ -12,6 +12,8 @@ Future<void> createRecipesFromFiles() async {
     final instructionsRaw = await File('lib/src/instructions.txt').readAsString();
     final categories = await File('lib/src/categories.txt').readAsLines(); // 카테고리 파일 읽기
 
+    final availableCategories = ['국&찌개', '반찬', '후식', '기타'];
+
     // 전체 일반 재료 리스트
     Set<String> allIngredientsSet = {};
 
@@ -80,7 +82,10 @@ Future<void> createRecipesFromFiles() async {
         final instructions = i < parsedInstructions.length ? parsedInstructions[i] : [];
 
         // 카테고리 파싱
-        final category = i < categories.length ? categories[i].trim() : '기타';
+        String category = i < categories.length ? categories[i].trim() : '기타';
+        if (!availableCategories.contains(category)) {
+          category = '기타';
+        }
 
         // JSON 객체 생성
         recipes.add({

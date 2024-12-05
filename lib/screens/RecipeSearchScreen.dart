@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/AllergyProvider.dart';
 import '../widgets/RecipeSearchItem.dart';
 import 'RecipeDetailScreen.dart';
+import '../widgets/ReusableButton.dart';
 
 class RecipeSearchScreen extends StatefulWidget {
   final List<Map<String, dynamic>> recipes; // 모든 레시피 데이터
@@ -40,7 +41,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
     super.dispose();
   }
 
-  /// 선택된 재료와 알레르기 데이터를 기반으로 레시피를 필터링
+  // 선택된 재료와 알레르기 데이터를 기반으로 레시피를 필터링
   void _filterRecipes() {
     final allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
     final List<String> excludedIngredients = allergyProvider.getExcludedIngredients();
@@ -53,22 +54,27 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
             [];
         final recipeCategory = recipe['category'] ?? '기타';
 
-        final containsSelectedMaterials = widget.selectedMaterials.every(
+        // 사용자가 선택한 재료 중 하나라도 포함되어 있는지 확인
+        final containsSelectedMaterials = widget.selectedMaterials.any(
               (material) => ingredients.any((ingredient) => ingredient.contains(material)),
         );
+
+        // 알레르기 재료가 포함되어 있는지 확인
         final containsExcludedAllergens = excludedIngredients.any(
               (allergen) => ingredients.contains(allergen),
         );
 
-        // 포함된 재료 조건 + 알레르기 제외 조건 + 선택된 카테고리 조건
+        // 카테고리 필터 조건
         final matchesCategory = selectedCategory == null || recipeCategory == selectedCategory;
 
+        // 하나라도 포함된 재료 조건 + 알레르기 제외 조건 + 선택된 카테고리 조건
         return containsSelectedMaterials && !containsExcludedAllergens && matchesCategory;
       }).toList();
     });
   }
 
-  /// 영양소 및 정렬 순서에 따라 레시피를 정렬
+
+  // 영양소 및 정렬 순서에 따라 레시피를 정렬
   void sortRecipes() {
     if (selectedNutrient == null) return; // 정렬 기준이 선택되지 않은 경우 종료
     setState(() {
@@ -84,7 +90,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
     });
   }
 
-  /// 즐겨찾기 상태를 토글
+  // 즐겨찾기 상태를 토글
   void toggleFavorite(int index) {
     setState(() {
       filteredRecipes[index]['isFavorite'] =
@@ -93,7 +99,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
     });
   }
 
-  /// 카테고리 필터 적용
+  // 카테고리 필터 적용
   void applyCategoryFilter(String category) {
     setState(() {
       selectedCategory = category == selectedCategory ? null : category;
@@ -158,13 +164,13 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Row(
-              children: categories
-                  .map((category) => _CategoryButton(
-                label: category,
-                isSelected: selectedCategory == category,
-                onTap: () => applyCategoryFilter(category),
-              ))
-                  .toList(),
+              children: categories.map((category) {
+                return ReusableButton(
+                  label: category,
+                  isSelected: selectedCategory == category,
+                  onTap: () => applyCategoryFilter(category),
+                );
+              }).toList(),
             ),
           ),
           // 정렬 필터 드롭다운
@@ -286,35 +292,35 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
     );
   }
 }
-
-class _CategoryButton extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _CategoryButton({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? Colors.green[700] : Colors.green,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18.0),
-          ),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(color: Colors.white),
-        ),
-      ),
-    );
-  }
-}
+//
+// class _CategoryButton extends StatelessWidget {
+//   final String label;
+//   final bool isSelected;
+//   final VoidCallback onTap;
+//
+//   const _CategoryButton({
+//     required this.label,
+//     required this.isSelected,
+//     required this.onTap,
+//   });
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(horizontal: 8.0),
+//       child: ElevatedButton(
+//         onPressed: onTap,
+//         style: ElevatedButton.styleFrom(
+//           backgroundColor: isSelected ? Colors.green[700] : Colors.green,
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(18.0),
+//           ),
+//         ),
+//         child: Text(
+//           label,
+//           style: const TextStyle(color: Colors.white),
+//         ),
+//       ),
+//     );
+//   }
+// }

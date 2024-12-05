@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/MaterialProvider.dart';
+import '../widgets/ReusableButton.dart';
 import 'RecipeSearchScreen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -152,8 +153,10 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       // FloatingActionButton with transparent background
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
+      floatingActionButton: ReusableButton(
+        label: '레시피 검색',
+        isSelected: false, // `isSelected`는 레시피 검색에 필요하지 않으므로 `false` 설정
+        onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -165,11 +168,6 @@ class HomeScreen extends StatelessWidget {
             ),
           );
         },
-        backgroundColor: Colors.green,
-        label: const Text(
-          '레시피 검색',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       bottomNavigationBar: const SizedBox(height: 0), // 빈 영역
