@@ -11,7 +11,6 @@ class RecipeDetailScreen extends StatelessWidget {
     required this.recipe,
   });
 
-
   void _fetchSubstitute(BuildContext context, String ingredient) async {
     final allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
     final excludedIngredients = allergyProvider.getExcludedIngredients();
@@ -190,16 +189,7 @@ class RecipeDetailScreen extends StatelessWidget {
                     ),
                     onPressed: () async {
                       // OpenAIService를 사용하여 대체 재료를 가져오는 함수 호출
-                      final openAIService = OpenAIService();
-                      final allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
-                      final excludedIngredients = allergyProvider.getExcludedIngredients();
                       _fetchSubstitute(context, ingredient);
-                      try {
-                        final substitute = await openAIService.sendMessage(recipe['title'], ingredient, excludedIngredients);
-                        _showSubstituteDialog(context, ingredient, substitute);
-                      } catch (e) {
-                        _showErrorDialog(context, e.toString());
-                      }
                     },
                     child: Text(
                       ingredient,
