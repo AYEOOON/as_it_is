@@ -31,20 +31,52 @@ class RecipeDetailScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('$ingredient 대체재'),
-          content: Text('$ingredient를 대신할 재료로 $substitute을 추천합니다.'),
+          title: Text(
+            '$ingredient 대체 재료',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+          content: RichText(
+            text: TextSpan(
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+              children: [
+                TextSpan(text: '$ingredient를 대신할 재료로 '),
+                TextSpan(
+                  text: substitute,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                TextSpan(text: '을 추천합니다.'),
+              ],
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('확인'),
+              child: Text(
+                '확인',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
             ),
           ],
         );
       },
     );
   }
+
 
   void _showErrorDialog(BuildContext context, String error) {
     showDialog(

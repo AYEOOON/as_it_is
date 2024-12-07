@@ -12,8 +12,8 @@ class MaterialProvider with ChangeNotifier {
 
   // Set available materials and initialize filtered materials
   void setMaterials(List<String> materials) {
-    _availableMaterials = List.from(materials);
-    _filteredMaterials = List.from(materials); // Initialize filtered list
+    _availableMaterials = List.from(materials)..sort(); // 가나다순 정렬
+    _filteredMaterials = List.from(_availableMaterials); // Initialize filtered list
     notifyListeners();
   }
 
@@ -22,6 +22,8 @@ class MaterialProvider with ChangeNotifier {
     if (_availableMaterials.contains(material)) {
       _availableMaterials.remove(material);
       _selectedMaterials.add(material);
+      _selectedMaterials.sort(); // 가나다순 정렬
+      _availableMaterials.sort(); // 정렬 유지
       _filteredMaterials = List.from(_availableMaterials); // Refresh filtered list
       notifyListeners();
     }
@@ -32,7 +34,8 @@ class MaterialProvider with ChangeNotifier {
     if (_selectedMaterials.contains(material)) {
       _selectedMaterials.remove(material);
       _availableMaterials.add(material);
-      _availableMaterials.sort(); // Sort the list
+      _selectedMaterials.sort(); // 정렬 유지
+      _availableMaterials.sort(); // 정렬 유지
       _filteredMaterials = List.from(_availableMaterials); // Refresh filtered list
       notifyListeners();
     }
@@ -42,7 +45,8 @@ class MaterialProvider with ChangeNotifier {
   void filterMaterials(String value) {
     _filteredMaterials = _availableMaterials
         .where((material) => material.toLowerCase().contains(value.toLowerCase()))
-        .toList();
+        .toList()
+    ..sort(); // 검색 결과 가나다 순 정렬
     notifyListeners();
   }
 }

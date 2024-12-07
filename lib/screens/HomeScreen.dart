@@ -113,7 +113,7 @@ class HomeScreen extends StatelessWidget {
                       const Padding(
                         padding: EdgeInsets.all(8.0),
                         child: Text(
-                          '가용 재료',
+                          '전체 재료',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
