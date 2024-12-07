@@ -46,7 +46,7 @@ class MaterialProvider with ChangeNotifier {
     _filteredMaterials = _availableMaterials
         .where((material) => material.toLowerCase().contains(value.toLowerCase()))
         .toList()
-    ..sort(); // 검색 결과 가나다 순 정렬
+      ..sort(); // 검색 결과 가나다순 정렬
     notifyListeners();
   }
 }
