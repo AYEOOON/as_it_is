@@ -26,16 +26,14 @@ class _FavoriteRecipesScreenState extends State<FavoriteRecipesScreen> {
 
   void _filterFavorites() {
     setState(() {
-      favoriteRecipes = widget.recipes
-          .where((recipe) =>
-      recipe['isFavorite'] == true &&
-          recipe['title']
-              .toString()
-              .toLowerCase()
-              .contains(searchQuery.toLowerCase()))
-          .toList();
+      favoriteRecipes = widget.recipes.where((recipe) {
+        final title = recipe['title']?.toLowerCase() ?? '';
+        return recipe['isFavorite'] == true &&
+            title.contains(searchQuery.toLowerCase());
+      }).toList();
     });
   }
+
 
   void _toggleFavorite(Map<String, dynamic> recipe) {
     setState(() {

@@ -61,7 +61,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
 
         // 알레르기 재료가 포함되어 있는지 확인
         final containsExcludedAllergens = excludedIngredients.any(
-              (allergen) => ingredients.contains(allergen),
+                (allergen) => ingredients.any((ingredient) => ingredient.contains(allergen.toLowerCase()))
         );
 
         // 카테고리 필터 조건
@@ -292,35 +292,3 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
     );
   }
 }
-//
-// class _CategoryButton extends StatelessWidget {
-//   final String label;
-//   final bool isSelected;
-//   final VoidCallback onTap;
-//
-//   const _CategoryButton({
-//     required this.label,
-//     required this.isSelected,
-//     required this.onTap,
-//   });
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-//       child: ElevatedButton(
-//         onPressed: onTap,
-//         style: ElevatedButton.styleFrom(
-//           backgroundColor: isSelected ? Colors.green[700] : Colors.green,
-//           shape: RoundedRectangleBorder(
-//             borderRadius: BorderRadius.circular(18.0),
-//           ),
-//         ),
-//         child: Text(
-//           label,
-//           style: const TextStyle(color: Colors.white),
-//         ),
-//       ),
-//     );
-//   }
-// }
