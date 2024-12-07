@@ -79,19 +79,15 @@ class HomeScreen extends StatelessWidget {
                           ),
                         )
                             : ListView.builder(
-                          itemCount:
-                          materialProvider.selectedMaterials.length,
+                          itemCount: materialProvider.selectedMaterials.length,
                           itemBuilder: (context, index) {
-                            final material =
-                            materialProvider.selectedMaterials[index];
+                            final material = materialProvider.selectedMaterials[index];
                             return ListTile(
                               title: Text(material),
                               trailing: IconButton(
-                                icon: const Icon(Icons.delete,
-                                    color: Colors.red),
+                                icon: const Icon(Icons.delete, color: Colors.red),
                                 onPressed: () {
-                                  materialProvider
-                                      .removeMaterial(material);
+                                  materialProvider.removeMaterial(material);
                                 },
                               ),
                             );
@@ -126,16 +122,13 @@ class HomeScreen extends StatelessWidget {
                           ),
                         )
                             : ListView.builder(
-                          itemCount:
-                          materialProvider.filteredMaterials.length,
+                          itemCount: materialProvider.filteredMaterials.length,
                           itemBuilder: (context, index) {
-                            final material =
-                            materialProvider.filteredMaterials[index];
+                            final material = materialProvider.filteredMaterials[index];
                             return ListTile(
                               title: Text(material),
                               trailing: IconButton(
-                                icon: const Icon(Icons.add,
-                                    color: Colors.green),
+                                icon: const Icon(Icons.add, color: Colors.green),
                                 onPressed: () {
                                   materialProvider.addMaterial(material);
                                 },
