@@ -77,7 +77,7 @@ Future<void> createRecipesFromFiles() async {
 
         // 전체 재료 리스트에 중복 없이 추가
         ingredients.forEach((ingredient) {
-          if (!allIngredientsSet.contains(ingredient)) {
+          if (!allIngredientsSet.contains(ingredient.trim())) {
             allIngredientsSet.add(ingredient);
           }
         });
