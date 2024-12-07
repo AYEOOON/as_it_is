@@ -47,31 +47,50 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
     final List<String> excludedIngredients = allergyProvider.getExcludedIngredients();
 
     setState(() {
+      // 필터링된 레시피를 선택된 재료와 알레르기 조건으로 걸러냄
       filteredRecipes = widget.recipes.where((recipe) {
         final ingredients = (recipe['ingredients'] as List<dynamic>?)
-            ?.map((e) => e.toString())
+            ?.map((e) => e.toString().toLowerCase())
             .toList() ??
             [];
         final recipeCategory = recipe['category'] ?? '기타';
 
-        // 사용자가 선택한 재료 중 하나라도 포함되어 있는지 확인
-        final containsSelectedMaterials = widget.selectedMaterials.any(
-              (material) => ingredients.any((ingredient) => ingredient.contains(material)),
-        );
+        // 사용자가 선택한 재료가 포함된 개수 계산
+        final selectedCount = widget.selectedMaterials.where((material) =>
+            ingredients.any((ingredient) => ingredient.contains(material.toLowerCase()))).length;
 
         // 알레르기 재료가 포함되어 있는지 확인
         final containsExcludedAllergens = excludedIngredients.any(
-                (allergen) => ingredients.any((ingredient) => ingredient.contains(allergen.toLowerCase()))
-        );
+                (allergen) => ingredients.any((ingredient) => ingredient.contains(allergen.toLowerCase())));
 
         // 카테고리 필터 조건
         final matchesCategory = selectedCategory == null || recipeCategory == selectedCategory;
 
-        // 하나라도 포함된 재료 조건 + 알레르기 제외 조건 + 선택된 카테고리 조건
-        return containsSelectedMaterials && !containsExcludedAllergens && matchesCategory;
+        // 필터링 조건 (선택된 재료 포함 + 알레르기 제외 + 카테고리 매칭)
+        return selectedCount > 0 && !containsExcludedAllergens && matchesCategory;
       }).toList();
+
+      // 필터링된 레시피를 선택된 재료 포함 개수 기준으로 정렬
+      filteredRecipes.sort((a, b) {
+        final aIngredients = (a['ingredients'] as List<dynamic>?)
+            ?.map((e) => e.toString().toLowerCase())
+            .toList() ??
+            [];
+        final bIngredients = (b['ingredients'] as List<dynamic>?)
+            ?.map((e) => e.toString().toLowerCase())
+            .toList() ??
+            [];
+
+        final aCount = widget.selectedMaterials.where((material) =>
+            aIngredients.any((ingredient) => ingredient.contains(material.toLowerCase()))).length;
+        final bCount = widget.selectedMaterials.where((material) =>
+            bIngredients.any((ingredient) => ingredient.contains(material.toLowerCase()))).length;
+
+        return bCount.compareTo(aCount); // 많은 개수가 위로 오도록 내림차순 정렬
+      });
     });
   }
+
 
 
   // 영양소 및 정렬 순서에 따라 레시피를 정렬

@@ -75,8 +75,12 @@ Future<void> createRecipesFromFiles() async {
             .where((e) => !e.contains(RegExp(r'(양념장|소스)'))) // 양념장, 소스 제거
             .toList();
 
-        // 전체 재료 리스트에 추가
-        allIngredientsSet.addAll(ingredients);
+        // 전체 재료 리스트에 중복 없이 추가
+        ingredients.forEach((ingredient) {
+          if (!allIngredientsSet.contains(ingredient)) {
+            allIngredientsSet.add(ingredient);
+          }
+        });
 
         // 만드는 법 파싱
         final instructions = i < parsedInstructions.length ? parsedInstructions[i] : [];
