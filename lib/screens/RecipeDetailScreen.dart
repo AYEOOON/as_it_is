@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/AllergyProvider.dart';
+import '../services/openai_service.dart';
 import '../widgets/ReusableButton.dart';
+
 
 class RecipeDetailScreen extends StatelessWidget {
   final Map<String, dynamic> recipe;
@@ -7,6 +11,92 @@ class RecipeDetailScreen extends StatelessWidget {
   const RecipeDetailScreen({
     required this.recipe,
   });
+
+  void _fetchSubstitute(BuildContext context, String ingredient) async {
+    final allergyProvider = Provider.of<AllergyProvider>(context, listen: false);
+    final excludedIngredients = allergyProvider.getExcludedIngredients();
+
+    final openAIService = OpenAIService();
+    // OpenAI API 호출
+    try {
+      final substitute = await openAIService.sendMessage(recipe['title'], ingredient, excludedIngredients);
+      _showSubstituteDialog(context, ingredient, substitute);
+    } catch (error) {
+      _showErrorDialog(context, "대체 재료를 불러오지 못했습니다.");
+    }
+  }
+
+  void _showSubstituteDialog(BuildContext context, String ingredient, String substitute) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            '$ingredient 대체 재료',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+          content: RichText(
+            text: TextSpan(
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+              children: [
+                TextSpan(text: '$ingredient를 대신할 재료로 '),
+                TextSpan(
+                  text: substitute,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                TextSpan(text: '을 추천합니다.'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                '확인',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  void _showErrorDialog(BuildContext context, String error) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('오류'),
+          content: Text('대체 재료를 가져오는 중 문제가 발생했습니다: $error'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,18 +205,33 @@ class RecipeDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+
+
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: detailedIngredients.map((ingredient) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Text(
-                    ingredient,
-                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green[100],
+                      foregroundColor: Colors.black,
+                    ),
+                    onPressed: () async {
+                      // OpenAIService를 사용하여 대체 재료를 가져오는 함수 호출
+                      _fetchSubstitute(context, ingredient);
+                    },
+                    child: Text(
+                      ingredient,
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   ),
                 );
               }).toList(),
             ),
+
+
+
             const SizedBox(height: 24),
             // 만드는 법
             const Text(

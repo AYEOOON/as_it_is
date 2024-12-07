@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/HomeScreen.dart';
 import 'screens/FavoriteRecipesScreen.dart';
 import 'screens/SettingScreen.dart';
@@ -12,8 +13,10 @@ import 'src/createRecipesFromFiles.dart'; // JSON 생성 함수 파일 추가
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await dotenv.load();  // .env 파일 로드
   // JSON 생성 후 실행
   await createRecipesFromFiles(); // JSON 데이터 생성
+
   runApp(
     MultiProvider(
       providers: [
